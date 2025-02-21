@@ -2,8 +2,8 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>App com Menu Deslizante</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>App com Menu Deslizante - Correção Responsiva</title>
   <style>
     body {
       margin: 0;
@@ -12,21 +12,28 @@
       overflow: hidden;
     }
 
-    .app-container {
+    #app {
       position: relative;
-      width: 300vw;
+      width: 100vw;
       height: 100vh;
-      display: flex;
-      transition: transform 0.5s ease;
+      overflow: hidden;
     }
 
     .screen {
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 2rem;
+      position: absolute;
+      top: 0;
+      left: 100%;
+      transition: left 0.5s ease;
+    }
+
+    .screen.active {
+      left: 0;
     }
 
     .home { background-color: #f0f0f0; }
@@ -41,6 +48,7 @@
       justify-content: space-around;
       background-color: #fff;
       border-top: 1px solid #ccc;
+      z-index: 10;
     }
 
     .menu button {
@@ -59,11 +67,7 @@
   </style>
 </head>
 <body>
-  <div id="app" class="app-container">
-    <div class="screen home">Home</div>
-    <div class="screen pomodoro">Pomodoro</div>
-    <div class="screen musica">Música</div>
-  </div>
+  <div id="app"></div>
 
   <div class="menu">
     <button id="btn-home" class="active">Home</button>
@@ -75,16 +79,72 @@
     const app = document.getElementById('app');
     const buttons = document.querySelectorAll('.menu button');
 
-    function navigateTo(index) {
-      app.style.transform = `translateX(-${index * 100}vw)`;
-      buttons.forEach((btn, i) => {
-        btn.classList.toggle('active', i === index);
+    const screens = {
+      home: '<div class="screen home">Home</div>',
+      pomodoro: '<div class="screen pomodoro">Pomodoro</div>',
+      musica: '<div class="screen musica">Música</div>'
+    };
+
+    let currentScreen = null;
+    let currentScreenName = 'home';
+
+    function renderScreen(screenName) {
+      if (screenName === currentScreenName) return;
+
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = screens[screenName];
+      const newScreen = tempDiv.firstChild;
+
+      // Define o z-index baseado na direção
+      const screenOrder = ['home', 'pomodoro', 'musica'];
+      const currentIndex = screenOrder.indexOf(currentScreenName);
+      const newIndex = screenOrder.indexOf(screenName);
+
+      if (newIndex > currentIndex) {
+        newScreen.style.zIndex = 2;
+        if (currentScreen) currentScreen.style.zIndex = 1;
+      } else {
+        newScreen.style.zIndex = 1;
+        if (currentScreen) currentScreen.style.zIndex = 2;
+      }
+
+      app.appendChild(newScreen);
+
+      // Força o reflow para a animação funcionar
+      newScreen.getBoundingClientRect();
+      newScreen.classList.add('active');
+
+      // Remove a tela anterior após a transição
+      setTimeout(() => {
+        if (currentScreen) app.removeChild(currentScreen);
+        currentScreen = newScreen;
+        currentScreenName = screenName;
+      }, 500);
+    }
+
+    function setActiveButton(activeIndex) {
+      buttons.forEach((btn, index) => {
+        btn.classList.toggle('active', index === activeIndex);
       });
     }
 
-    document.getElementById('btn-home').addEventListener('click', () => navigateTo(0));
-    document.getElementById('btn-pomodoro').addEventListener('click', () => navigateTo(1));
-    document.getElementById('btn-musica').addEventListener('click', () => navigateTo(2));
+    buttons[0].addEventListener('click', () => {
+      renderScreen('home');
+      setActiveButton(0);
+    });
+
+    buttons[1].addEventListener('click', () => {
+      renderScreen('pomodoro');
+      setActiveButton(1);
+    });
+
+    buttons[2].addEventListener('click', () => {
+      renderScreen('musica');
+      setActiveButton(2);
+    });
+
+    // Inicializa com a tela Home
+    renderScreen('home');
   </script>
 </body>
 </html>
