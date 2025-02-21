@@ -82,7 +82,12 @@
     const screens = {
       home: '<div class="screen home">Home</div>',
       pomodoro: '<div class="screen pomodoro">Pomodoro</div>',
-      musica: '<div class="screen musica">Música</div>'
+       musica: `
+        <div class="screen musica">
+          <div>Música</div>
+          <div style="position: absolute; width: 30em;" class="elfsight-app-8e57e5b7-217a-4abd-ad58-2496502a239d" data-elfsight-app-lazy></div>
+        </div>
+      `
     };
 
     let currentScreen = null;
@@ -146,5 +151,6 @@
     // Inicializa com a tela Home
     renderScreen('home');
   </script>
+  <script src="https://static.elfsight.com/platform/platform.js" async></script>
 </body>
 </html>
